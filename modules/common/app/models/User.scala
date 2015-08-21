@@ -3,7 +3,7 @@ package models
 import utils.silhouette.IdentitySilhouette
 import com.mohiva.play.silhouette.contrib.utils.BCryptPasswordHasher
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 
 
 case class User (

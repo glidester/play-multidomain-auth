@@ -1,9 +1,10 @@
 package controllers.common
 
-import controllers.AssetsBuilder
 import controllers.Assets.Asset
+import controllers.AssetsBuilder
+import play.api.http.DefaultHttpErrorHandler
 
-trait MyAssetsTrait extends AssetsBuilder {
+abstract class MyAssetsTrait extends AssetsBuilder(DefaultHttpErrorHandler) {
 	def public (path: String, file: Asset) = versioned(path, file)
 	def lib (path: String, file: Asset) = versioned(path, file)
 	def css (path: String, file: Asset) = versioned(path, file)

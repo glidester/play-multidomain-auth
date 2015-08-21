@@ -1,3 +1,6 @@
 @(name: String)
 @import controllers.admin.routes
+@import play.api.Play.current
+@import play.api.i18n.Messages.Implicits._
+
 @Messages("mail.welcome.msg", name)

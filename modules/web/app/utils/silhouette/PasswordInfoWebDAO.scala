@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.core.providers.PasswordInfo
 import com.mohiva.play.silhouette.contrib.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.core.LoginInfo
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 
 class PasswordInfoWebDAO extends DelegableAuthInfoDAO[PasswordInfo] {
 

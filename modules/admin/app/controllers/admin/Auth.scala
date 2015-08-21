@@ -6,6 +6,7 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
 import models._
 import utils.silhouette._
 import utils.silhouette.Implicits._
@@ -13,7 +14,7 @@ import com.mohiva.play.silhouette.core.{LoginEvent, LogoutEvent, LoginInfo}
 import com.mohiva.play.silhouette.core.providers.Credentials
 import com.mohiva.play.silhouette.core.exceptions.{AuthenticationException, AccessDeniedException}
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 
 object Auth extends SilhouetteAdminController {
 

@@ -6,7 +6,6 @@ import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object Constraints {

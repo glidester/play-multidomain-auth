@@ -3,7 +3,7 @@ package utils.silhouette
 import models.TokenUser
 import com.mohiva.play.silhouette.core.services.TokenService
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 
 class TokenUserService extends TokenService[TokenUser] {
 	def create (token: TokenUser): Future[Option[TokenUser]] = {

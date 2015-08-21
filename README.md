@@ -1,4 +1,9 @@
-## Multidomain Auth [Play 2.3 - Scala]
+## TODO:
+* Finish following [Migration24](https://www.playframework.com/documentation/2.4.x/ScalaDependencyInjection)
+* Digest new DI in play [Runtime Dependency Injection](https://www.playframework.com/documentation/2.4.x/ScalaDependencyInjection)  
+* Convert to dependency injected controllers.
+
+## Multidomain Auth [Play 2.4 - Scala]
 
 This is a second part of [Multidomain Seed](https://github.com/adrianhurt/play-multidomain-seed) project. Please follow the steps described there to run both services (the public web page and the administration web page).
 
@@ -29,7 +34,7 @@ I've used the [Mailer plugin](https://github.com/typesafehub/play-plugins/tree/m
 For example, for a gmail email address:
 
     mail.from="your@gmail.com"
-    smtp {
+    play.mailer {
       host=smtp.gmail.com
       port=587
       user="your@gmail.com"
