@@ -1,7 +1,8 @@
-## TODO:
-* Finish following [Migration24](https://www.playframework.com/documentation/2.4.x/ScalaDependencyInjection)
-* Digest new DI in play [Runtime Dependency Injection](https://www.playframework.com/documentation/2.4.x/ScalaDependencyInjection)  
-* Convert to dependency injected controllers.
+## Silhouette upgrade from 1.1 to 3.0 (Compiles and runs but errors)
+
+None of the 'web' module routes are available for some reason I can't figure. 
+Also the RequestCredentialsProvider class needs implementing to extract the login credentials from Request and create a LogoinInfo object.
+I'm sure there is more to do too but the above has halted my progress for now.
 
 ## Multidomain Auth [Play 2.4 - Scala]
 
