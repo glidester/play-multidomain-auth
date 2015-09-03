@@ -1,10 +1,11 @@
 package utils.silhouette
 
 import models.{User, TokenUser}
-import com.mohiva.play.silhouette.core.Environment
-import com.mohiva.play.silhouette.contrib.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.api.Environment
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import scala.concurrent.ExecutionContext.Implicits.global
 
-trait SilhouetteWebController extends SilhouetteController[User, TokenUser] {
+trait SilhouetteWebController extends SilhouetteController[User] {
 	
 	lazy val identityService = new UserService
 	lazy val passwordInfoDAO = new PasswordInfoWebDAO
@@ -13,7 +14,7 @@ trait SilhouetteWebController extends SilhouetteController[User, TokenUser] {
 	implicit lazy val env = Environment[User, CookieAuthenticator](
 		identityService,
 		authenticatorService,
-		Map(credentialsProvider.id -> credentialsProvider),
+		Seq(credentialsProvider),
 		eventBus
 	)
 }

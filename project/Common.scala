@@ -50,8 +50,10 @@ object Common {
     specs2 % Test,
     "com.typesafe.play" %% "play-mailer" % "3.0.1",
 		"org.webjars" % "requirejs" % "2.1.19",
-		"com.mohiva" %% "play-silhouette" % "1.1-SNAPSHOT",
-		"com.adrianhurt" %% "play-bootstrap3" % "0.4"	// Add bootstrap3 helpers and field constructors (http://play-bootstrap3.herokuapp.com/)
+		"com.mohiva" %% "play-silhouette" % "3.0.0",
+		"com.adrianhurt" %% "play-bootstrap3" % "0.4",	// Add bootstrap3 helpers and field constructors (http://play-bootstrap3.herokuapp.com/)
+	  "net.codingwell" %% "scala-guice" % "4.0.0",
+    "net.ceedubs" %% "ficus" % "1.1.2"
 		// Add here more common dependencies:
 		// jdbc,
 		// anorm,

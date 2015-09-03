@@ -6,6 +6,7 @@
 
 ->  / common.Routes
 
-->  / admin.Routes
-
 ->  / web.Routes
+
+#->  / admin.Routes
+

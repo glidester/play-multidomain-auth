@@ -3,17 +3,17 @@
 # ~~~~
 
 # Authentication pages
-GET     /signin					controllers.admin.Auth.signIn
-GET		/signout				controllers.admin.Auth.signOut
-POST	/authenticate			controllers.admin.Auth.authenticate
-GET     /denied					controllers.admin.Auth.accessDenied
+GET     /signin					@controllers.admin.Auth.signIn
+GET		/signout				@controllers.admin.Auth.signOut
+POST	/authenticate			@controllers.admin.Auth.authenticate
+GET     /denied					@controllers.admin.Auth.accessDenied
 
 # Home page
-GET     /						controllers.admin.Application.index
-GET     /social					controllers.admin.Application.social
-GET     /sales_or_high			controllers.admin.Application.salesOrHigh
-GET     /sales_and_high			controllers.admin.Application.salesAndHigh
-GET     /admin					controllers.admin.Application.admin
+GET     /						@controllers.admin.Application.index
+GET     /social					@controllers.admin.Application.social
+GET     /sales_or_high			@controllers.admin.Application.salesOrHigh
+GET     /sales_and_high			@controllers.admin.Application.salesAndHigh
+GET     /admin					@controllers.admin.Application.admin
 
 
 

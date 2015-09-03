@@ -1,12 +1,12 @@
 package models
 
 import utils.silhouette.IdentitySilhouette
-import com.mohiva.play.silhouette.contrib.utils.BCryptPasswordHasher
+import com.mohiva.play.silhouette.impl.util.BCryptPasswordHasher
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
 
-case class Manager (
+case class Manager  (
 	id: Long,
 	email: String,
 	password: String,

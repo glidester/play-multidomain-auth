@@ -1,6 +1,5 @@
 package models
 
-import com.mohiva.play.silhouette.core.Token
 import org.joda.time.DateTime
 import scala.concurrent.Future
 

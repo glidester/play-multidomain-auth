@@ -3,21 +3,21 @@
 # ~~~~
 
 # Authentication pages
-GET		/signup						controllers.web.Auth.startSignUp
-POST	/signup						controllers.web.Auth.handleStartSignUp
-GET		/signup/:token				controllers.web.Auth.signUp(token: String)
-GET		/signin						controllers.web.Auth.signIn
-POST	/authenticate				controllers.web.Auth.authenticate
-GET		/signout					controllers.web.Auth.signOut
-GET		/reset						controllers.web.Auth.forgotPassword
-POST	/reset						controllers.web.Auth.handleForgotPassword
-GET		/reset/:token				controllers.web.Auth.resetPassword(token: String)
-POST	/reset/:token				controllers.web.Auth.handleResetPassword(token: String)
+GET		/signup						@controllers.web.Auth.startSignUp
+POST	/signup						@controllers.web.Auth.handleStartSignUp
+GET		/signup/:token				@controllers.web.Auth.signUp(token: String)
+GET		/signin						@controllers.web.Auth.signIn
+POST	/authenticate				@controllers.web.Auth.authenticate
+GET		/signout					@controllers.web.Auth.signOut
+GET		/reset						@controllers.web.Auth.forgotPassword
+POST	/reset						@controllers.web.Auth.handleForgotPassword
+GET		/reset/:token				@controllers.web.Auth.resetPassword(token: String)
+POST	/reset/:token				@controllers.web.Auth.handleResetPassword(token: String)
 
 
 # Home page
-GET     /							controllers.web.Application.index
-GET     /myaccount					controllers.web.Application.myAccount
+GET     /							@controllers.web.Application.index
+GET     /myaccount					@controllers.web.Application.myAccount
 
 
 

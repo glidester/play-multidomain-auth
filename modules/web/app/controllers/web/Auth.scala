@@ -1,25 +1,30 @@
 package controllers.web
 
+import javax.inject.Inject
+
 import play.api._
+import play.api.cache.CacheApi
 import play.api.mvc._
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraints._
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{MessagesApi, Messages}
 import models._
 import utils.silhouette._
 import utils.silhouette.Implicits._
-import com.mohiva.play.silhouette.core.{SignUpEvent, LoginEvent, LogoutEvent}
-import com.mohiva.play.silhouette.core.providers.Credentials
-import com.mohiva.play.silhouette.core.exceptions.{AuthenticationException, AccessDeniedException}
+import com.mohiva.play.silhouette.api.{SignUpEvent, LoginEvent, LogoutEvent}
+import com.mohiva.play.silhouette.api.util.{CacheLayer, Credentials}
+import com.mohiva.play.silhouette.impl.exceptions.{AccessDeniedException}
 import utils.Constraints._
 import utils.web.Mailer
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
 
-object Auth extends SilhouetteWebController {
+class Auth @Inject()(cache: CacheLayer, messages: MessagesApi) extends SilhouetteWebController {
+
+  override def cacheLayer: CacheLayer = cache
+  override def messagesApi: MessagesApi = messages
 
 	// SIGN UP
 	
@@ -72,17 +77,19 @@ object Auth extends SilhouetteWebController {
 			case Some(token) if (token.isSignUp && !token.isExpired) => {
 				User.findByEmail(token.email).flatMap {
 					case Some(user) => {
-						authenticatorService.create(user).flatMap { authenticator =>
+						authenticatorService.create(user.loginInfo).flatMap { authenticator =>
 							if (!user.emailConfirmed) {
 								User.save(user.copy(emailConfirmed = true))
-								eventBus.publish(SignUpEvent(user, request, request2lang))
+								eventBus.publish(SignUpEvent(user, request, request2Messages))
 							}
-							eventBus.publish(LoginEvent(user, request, request2lang))
+							eventBus.publish(LoginEvent(user, request, request2Messages))
 							tokenService.consume(tokenId)
-							authenticatorService.init(authenticator, Future.successful(Ok(views.html.web.auth.signedUp(user))))
+							authenticatorService.init(authenticator)
+
+							Future.successful(Ok(views.html.web.auth.signedUp(user)))
 						}
 					}
-					case None => Future.failed(new AuthenticationException("Couldn't find user"))
+					case None => Future.failed(new RuntimeException("Couldn't find user"))
 				}
 			}
 			case Some(token) => {
@@ -120,14 +127,19 @@ object Auth extends SilhouetteWebController {
 		signInForm.bindFromRequest.fold(
 			formWithErrors => Future.successful(BadRequest(views.html.web.auth.signIn(formWithErrors))),
 			credentials => {
-				credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-					identityService.retrieve(loginInfo).flatMap {
-						case Some(user) => authenticatorService.create(user).flatMap { authenticator =>
-							eventBus.publish(LoginEvent(user, request, request2lang))
-							authenticatorService.init(authenticator, Future.successful(Redirect(routes.Application.index)))
-						}
-						case None => Future.failed(new AuthenticationException("Couldn't find user"))
-					}
+				credentialsProvider.authenticate(request).flatMap { optLoginInfo =>
+          val oo = optLoginInfo.map { loginInfo =>
+            identityService.retrieve(loginInfo).flatMap {
+              case Some(user) => authenticatorService.create(loginInfo).flatMap { authenticator =>
+                eventBus.publish(LoginEvent(user, request, request2Messages))
+                authenticatorService.init(authenticator)
+                Future.successful(Redirect(routes.Application.index))
+              }
+              case None => Future.failed(new RuntimeException("Couldn't find user"))
+            }
+          }
+
+          oo.getOrElse( Future.failed(new RuntimeException("Couldn't find loginInfo")) )
 				}.recoverWith {
 					case e: AccessDeniedException => Future.successful(Redirect(routes.Auth.signIn).flashing("error" -> Messages("access.credentials.incorrect")))
 				}.recoverWith(exceptionHandler)
@@ -142,10 +154,10 @@ object Auth extends SilhouetteWebController {
 	* Signs out the user
 	*/
 	def signOut = SecuredAction.async { implicit request =>
-		eventBus.publish(LogoutEvent(request.identity, request, request2lang))
+		eventBus.publish(LogoutEvent(request.identity, request, request2Messages))
 		authenticatorService.retrieve.flatMap {
-			case Some(authenticator) => authenticatorService.discard(authenticator, Future.successful(Redirect(routes.Application.index)))
-			case None => Future.failed(new AuthenticationException("Couldn't find authenticator"))
+			case Some(authenticator) => authenticatorService.discard(authenticator, Redirect(routes.Application.index))
+			case None => Future.failed(new RuntimeException("Couldn't find authenticator"))
 		}
 	}
 	
@@ -214,13 +226,14 @@ object Auth extends SilhouetteWebController {
 							case Some(user) => {
 								val authInfo = passwordHasher.hash(passwords._1)
 								authInfoService.save(token.email, authInfo)
-								authenticatorService.create(user).flatMap { authenticator =>
-									eventBus.publish(LoginEvent(user, request, request2lang))
+								authenticatorService.create(user.loginInfo).flatMap { authenticator =>
+									eventBus.publish(LoginEvent(user, request, request2Messages))
 									tokenService.consume(tokenId)
-									authenticatorService.init(authenticator, Future.successful(Ok(views.html.web.auth.resetedPassword(user))))
+									authenticatorService.init(authenticator)
+									Future.successful(Ok(views.html.web.auth.resetedPassword(user)))
 								}
 							}
-							case None => Future.failed(new AuthenticationException("Couldn't find user"))
+							case None => Future.failed(new RuntimeException("Couldn't find user"))
 						}
 					}
 					case Some(token) => {

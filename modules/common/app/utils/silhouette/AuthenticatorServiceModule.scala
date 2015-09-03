@@ -1,9 +1,12 @@
 package utils.silhouette
 
+import com.mohiva.play.silhouette.impl.util.DefaultFingerprintGenerator
 import play.api.Play
 import play.api.Play.current
-import com.mohiva.play.silhouette.contrib.authenticators.{CookieAuthenticator, CookieAuthenticatorService, CookieAuthenticatorSettings}
-import com.mohiva.play.silhouette.core.utils.{CacheLayer, IDGenerator, Clock}
+import com.mohiva.play.silhouette.impl.authenticators.{CookieAuthenticatorService, CookieAuthenticatorSettings}
+import com.mohiva.play.silhouette.api.util.{CacheLayer, IDGenerator, Clock}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.FiniteDuration
 
 trait AuthenticatorServiceModule {
 
@@ -14,14 +17,17 @@ trait AuthenticatorServiceModule {
 			cookieDomain = Play.configuration.getString("silhouette.authenticator.cookieDomain"),
 			secureCookie = Play.configuration.getBoolean("silhouette.authenticator.secureCookie").get,
 			httpOnlyCookie = Play.configuration.getBoolean("silhouette.authenticator.httpOnlyCookie").get,
-			authenticatorIdleTimeout = Play.configuration.getInt("silhouette.authenticator.authenticatorIdleTimeout").get,
-			cookieMaxAge = Play.configuration.getInt("silhouette.authenticator.cookieMaxAge"),
-			authenticatorExpiry = Play.configuration.getInt("silhouette.authenticator.authenticatorExpiry").get
+			authenticatorIdleTimeout = Play.configuration.getInt("silhouette.authenticator.authenticatorIdleTimeout").map(timeout => FiniteDuration(timeout,"minutes")),
+			cookieMaxAge = Play.configuration.getInt("silhouette.authenticator.cookieMaxAge").map(timeout => FiniteDuration(timeout,"minutes")),
+			authenticatorExpiry = FiniteDuration(Play.configuration.getInt("silhouette.authenticator.authenticatorExpiry").get,"minutes")
 		),
-		cacheLayer,
+		None,
+		new DefaultFingerprintGenerator(false),
 		idGenerator,
 		Clock()
 	)
+
+
 
 	def cacheLayer: CacheLayer
 	def idGenerator: IDGenerator

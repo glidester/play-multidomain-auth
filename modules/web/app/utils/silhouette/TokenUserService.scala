@@ -1,7 +1,6 @@
 package utils.silhouette
 
-import models.TokenUser
-import com.mohiva.play.silhouette.core.services.TokenService
+import models.{TokenService, TokenUser}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 

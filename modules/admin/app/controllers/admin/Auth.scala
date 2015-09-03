@@ -1,25 +1,29 @@
 package controllers.admin
 
+import javax.inject.Inject
+
+import com.mohiva.play.silhouette.impl.util.PlayCacheLayer
 import play.api._
+import play.api.cache.CacheApi
 import play.api.mvc._
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
-import models._
+import play.api.i18n.{MessagesApi, Messages}
 import utils.silhouette._
 import utils.silhouette.Implicits._
-import com.mohiva.play.silhouette.core.{LoginEvent, LogoutEvent, LoginInfo}
-import com.mohiva.play.silhouette.core.providers.Credentials
-import com.mohiva.play.silhouette.core.exceptions.{AuthenticationException, AccessDeniedException}
+import com.mohiva.play.silhouette.api.{LoginEvent, LogoutEvent, LoginInfo}
+import com.mohiva.play.silhouette.api.util.{CacheLayer, Credentials}
+import com.mohiva.play.silhouette.impl.exceptions.{AccessDeniedException}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-object Auth extends SilhouetteAdminController {
+class Auth @Inject() (cache: CacheLayer, messages: MessagesApi) extends SilhouetteAdminController {
 
-	// SIGN IN
-	
+  override def cacheLayer: CacheLayer = cache
+  override def messagesApi: MessagesApi = messages
+
+  // SIGN IN
 	val signInForm = Form(
 		mapping(
 			"identifier" -> email,
@@ -44,14 +48,19 @@ object Auth extends SilhouetteAdminController {
 		signInForm.bindFromRequest.fold(
 			formWithErrors => Future.successful(BadRequest(views.html.admin.auth.signIn(formWithErrors))),
 			credentials => {
-				credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-					identityService.retrieve(loginInfo).flatMap {
-						case Some(manager) => authenticatorService.create(manager).flatMap { authenticator =>
-							eventBus.publish(LoginEvent(manager, request, request2lang))
-							authenticatorService.init(authenticator, Future.successful(Redirect(routes.Application.index)))
-						}
-						case None => Future.failed(new AuthenticationException("Couldn't find manager"))
-					}
+				credentialsProvider.authenticate(request).flatMap { optLoginInfo =>
+          val oo = optLoginInfo.map { loginInfo =>
+            identityService.retrieve(loginInfo).flatMap {
+              case Some(manager) => authenticatorService.create(loginInfo).flatMap { authenticator =>
+                eventBus.publish(LoginEvent(manager, request, request2Messages))
+                authenticatorService.init(authenticator)
+                Future.successful(Redirect(routes.Application.index))
+              }
+              case None => Future.failed(new RuntimeException("Couldn't find manager"))
+            }
+          }
+
+          oo.getOrElse( Future.failed(new RuntimeException("Couldn't find loginInfo")) )
 				}.recoverWith {
 					case e: AccessDeniedException => Future.successful(Redirect(routes.Auth.signIn).flashing("error" -> Messages("access.credentials.incorrect")))
 				}.recoverWith(exceptionHandler)
@@ -66,10 +75,10 @@ object Auth extends SilhouetteAdminController {
 	* Signs out the manager
 	*/
 	def signOut = SecuredAction.async { implicit request =>
-		eventBus.publish(LogoutEvent(request.identity, request, request2lang))
+		eventBus.publish(LogoutEvent(request.identity, request, request2Messages))
 		authenticatorService.retrieve.flatMap {
-			case Some(authenticator) => authenticatorService.discard(authenticator, Future.successful(Redirect(routes.Application.index)))
-			case None => Future.failed(new AuthenticationException("Couldn't find authenticator"))
+			case Some(authenticator) => authenticatorService.discard(authenticator, Redirect(routes.Application.index))
+			case None => Future.failed(new RuntimeException("Couldn't find authenticator"))
 		}
 	}
 	
